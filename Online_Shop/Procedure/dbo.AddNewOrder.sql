@@ -4,6 +4,7 @@
 AS
 BEGIN
 BEGIN TRY
+BEGIN TRAN
 DECLARE 
 @OperationName varchar(20) = 'AddNewOrder',
 @Description varchar(30) = 'Add New order',
@@ -27,16 +28,17 @@ SELECT @OrderId,value FROM string_split(@ProductsId, ',');
 
 UPDATE master.Warehouse
 			SET InStock = 0
-				WHERE ProductsID IN (SELECT value FROM string_split('12,1', ','))
+				WHERE ProductsID IN (SELECT value FROM string_split(@ProductsId, ','))
 
 			UPDATE Log.OperationRuns
 				SET EndTime = (SELECT GETDATE()),
 			        STATUS = 'Successfully'
 				WHERE id = (SELECT Ident_current('Log.OperationRuns'))
 
-
+				COMMIT TRAN
 		END TRY
 			BEGIN CATCH
+			ROLLBACK TRAN
 				SET @ErrorMessege = ( @ProcName + ' Is faild')
 				EXEC Dbo.ErrorLog @ERROR_NUMBER = ERROR_NUMBER,
 				 @ERROR_SEVERITY = ERROR_SEVERITY,

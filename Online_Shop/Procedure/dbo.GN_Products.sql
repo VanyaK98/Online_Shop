@@ -15,13 +15,13 @@ BEGIN TRY
 	@Price money,
 	@Counter int,
 	@OperationName varchar(20) = 'GN_Products',
-	@Description varchar(30) = 'Populate tables Сharacteristics,Products,Warehouse',
+	@Description varchar(100) = 'Populate tables ConfigurationModels,Products,Warehouse',
 	@ProcName varchar(20) = 'GN_Products',
 	@ErrorMessege varchar(25),
 	@CurrentVersion int,
     @RunID int
 
-	EXEC dbo.OperationRuns @OperationName = @OperationName,
+	EXEC dbo.OperationRuns	@OperationName = @OperationName,
 								  @Description = @Description,
 								  @ProcName = @ProcName
 
@@ -54,18 +54,19 @@ BEGIN TRY
 	DELETE  FROM #StagingTable 
 	WHERE Name + Type + Weight + BatteryCapacity +
 	Processor + MemoryCapacity + Color  + ScreenDiagonal is null 
-	DECLARE Cursor1 Cursor LOCAL READ_ONLY FOR SELECT * FROM #StagingTable
+
+	DECLARE Cursor1 Cursor LOCAL READ_ONLY FASt_FORWARD FOR SELECT * FROM #StagingTable
 	OPEN Cursor1
 
-	
+	FETCH NEXT FROM Cursor1 
+				INTO @Name,@Type,@Weight,@BatteryCapacity,@MemoryCapacity,@Processor,@ScreenDiagonal,@Color, @date,@Price
 
 
 
-
+	 
 		WHILE  @@FETCH_STATUS = 0
 			BEGIN 
-				FETCH NEXT FROM Cursor1 
-				INTO @Name,@Type,@Weight,@BatteryCapacity,@MemoryCapacity,@Processor,@ScreenDiagonal,@Color, @date,@Price
+				
 
 				INSERT INTO Master.Products(Name,Type)
 				VALUES (@Name,@Type)
@@ -85,21 +86,25 @@ BEGIN TRY
 
 				INSERT INTO Master.Warehouse(ProductsID,ConfigurationModelId,ReceivingDate,StartVersion, Price)
 				VALUES ((SELECT Ident_current('Master.Products')),(SELECT Ident_current('Master.ConfigurationModels')),@date,(10000 + @CurrentVersion),@Price)
-
+				FETCH NEXT FROM Cursor1 
+				INTO @Name,@Type,@Weight,@BatteryCapacity,@MemoryCapacity,@Processor,@ScreenDiagonal,@Color, @date,@Price
 			END 
+
 			UPDATE Log.OperationRuns
 				SET EndTime = (SELECT GETDATE()),
 			        STATUS = 'Successfully'
 				WHERE id = (SELECT Ident_current('Log.OperationRuns'))
+
 		END TRY
+
 			BEGIN CATCH
 				SET @ErrorMessege = ( @ProcName + ' Is faild')
-				EXEC dbo.ErrorLog @ERROR_NUMBER = ERROR_NUMBER,
-				 @ERROR_SEVERITY = ERROR_SEVERITY,
-				 @ERROR_STATE = ERROR_STATE,
-				 @ErrorProc = @ProcName,
-				 @ErrorLine = ERROR_LINE,
-				 @ErrorMessege = @ErrorMessege
+				EXEC Dbo.ErrorLog @ERROR_NUMBER = ERROR_NUMBER,
+								  @ERROR_SEVERITY = ERROR_SEVERITY,
+								  @ERROR_STATE = ERROR_STATE,
+							      @ErrorProc = @ProcName,
+				                  @ErrorLine = ERROR_LINE,
+				                  @ErrorMessege = @ErrorMessege
 				 	Close Cursor1 
 					DEALLOCATE  Cursor1
 					DROP TABLE #StagingTable 
@@ -110,4 +115,5 @@ BEGIN TRY
 	DEALLOCATE  Cursor1
 	DROP TABLE #StagingTable 
 END
+GO
 GO
