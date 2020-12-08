@@ -2,8 +2,8 @@
 AS
 BEGIN
 
-Exec GN_Clients;
-EXEC GN_Products;
-EXEC ST_Orders
+Exec dbo.GN_Clients;
+EXEC dbo.GN_Products;
+EXEC dbo.GN_Orders
 
 END

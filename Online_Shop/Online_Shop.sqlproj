@@ -86,5 +86,13 @@
     <Build Include="Procedure\dbo.GN_Clients.sql" />
     <Build Include="Procedure\dbo.GN_Products.sql" />
     <Build Include="Function\dbo.RandomProducts.sql" />
+    <Build Include="Procedure\dbo.GN_Orders.sql" />
+    <Build Include="Procedure\dbo.Exec_All.sql" />
+    <Build Include="Procedure\dbo.AddNewProduct.sql" />
+    <Build Include="Procedure\dbo.AddNewClient.sql" />
+    <Build Include="Procedure\dbo.AddNewOrder.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Scripts\Exec_All.sql" />
   </ItemGroup>
 </Project>

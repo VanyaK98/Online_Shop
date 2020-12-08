@@ -15,7 +15,7 @@ AS
 		@OrderId int
 
 
-		EXEC ST_OperationRuns 
+		EXEC dbo.OperationRuns 
 					@OperationName = @OperationName,
 					@Description = @Description,
 					@ProcName = @ProcName
@@ -54,7 +54,7 @@ AS
 			    END TRY
 					BEGIN CATCH
 						SET @ErrorMessege = ( @ProcName + ' Is faild')
-						EXEC ST_ErrorLog @ERROR_NUMBER = ERROR_NUMBER,
+						EXEC dbo.ErrorLog @ERROR_NUMBER = ERROR_NUMBER,
 						 @ERROR_SEVERITY = ERROR_SEVERITY,
 						 @ERROR_STATE = ERROR_STATE,
 						 @ErrorProc = @ProcName,
